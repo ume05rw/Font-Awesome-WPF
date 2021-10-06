@@ -15,6 +15,9 @@ namespace FontAwesome.UWP
     {
         private static readonly FontFamily FontAwesomeFontFamily = new FontFamily("ms-appx:///FontAwesome.UWP/FontAwesome.otf#FontAwesome");
 
+        /// <summary>
+        /// IconProperty
+        /// </summary>
         public static readonly DependencyProperty IconProperty =
             DependencyProperty.Register(
                 nameof(FontAwesome.Icon),
@@ -44,12 +47,21 @@ namespace FontAwesome.UWP
 
         private readonly int _uiThreadId;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public FontAwesome()
         {
             this._uiThreadId = Environment.CurrentManagedThreadId;
             this.FontFamily = FontAwesome.FontAwesomeFontFamily;
         }
 
+        /// <summary>
+        /// SetValueOnUI
+        /// </summary>
+        /// <param name="dp"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public async Task SetValueOnUI(DependencyProperty dp, object value)
         {
             if (this._uiThreadId == Environment.CurrentManagedThreadId)
