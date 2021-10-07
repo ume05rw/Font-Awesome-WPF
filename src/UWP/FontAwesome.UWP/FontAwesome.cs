@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -10,10 +11,18 @@ namespace FontAwesome.UWP
     /// <summary>
     /// Represents ann icon that uses the FontAwesome font
     /// </summary>
-    public class FontAwesome
-        : FontIcon
+    public class FontAwesome : FontIcon
     {
-        private static readonly FontFamily FontAwesomeFontFamily = new FontFamily("ms-appx:///FontAwesome.UWP/FontAwesome.otf#FontAwesome");
+        private const string FontUrl = "ms-appx:///FontAwesome.UWP/FontAwesome.otf#FontAwesome";
+        private static readonly Dictionary<int, FontFamily> FontDictionary = new Dictionary<int, FontFamily>();
+
+        private static FontFamily GetFontFamily()
+        {
+            if (!FontAwesome.FontDictionary.ContainsKey(Environment.CurrentManagedThreadId))
+                FontAwesome.FontDictionary.Add(Environment.CurrentManagedThreadId, new FontFamily(FontAwesome.FontUrl));
+
+            return FontAwesome.FontDictionary[Environment.CurrentManagedThreadId];
+        }
 
         /// <summary>
         /// IconProperty
@@ -41,7 +50,8 @@ namespace FontAwesome.UWP
             if (dependencyPropertyChangedEventArgs.NewValue != null)
                 fontToSet = (FontAwesomeIcon)dependencyPropertyChangedEventArgs.NewValue;
 
-            _ = fontAwesome.SetValueOnUI(FontFamilyProperty, FontAwesomeFontFamily);
+            //var fontFamily =
+            _ = fontAwesome.SetValueOnUI(FontFamilyProperty, FontAwesome.GetFontFamily());
             _ = fontAwesome.SetValueOnUI(GlyphProperty, char.ConvertFromUtf32((int)fontToSet));
         }
 
@@ -53,7 +63,7 @@ namespace FontAwesome.UWP
         public FontAwesome()
         {
             this._uiThreadId = Environment.CurrentManagedThreadId;
-            this.FontFamily = FontAwesome.FontAwesomeFontFamily;
+            this.FontFamily = FontAwesome.GetFontFamily();
         }
 
         /// <summary>
