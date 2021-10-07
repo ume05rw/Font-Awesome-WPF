@@ -14,12 +14,16 @@ namespace FontAwesome.UWP
     public class FontAwesome : FontIcon
     {
         private const string FontUrl = "ms-appx:///FontAwesome.UWP/FontAwesome.otf#FontAwesome";
-        private static readonly Dictionary<int, FontFamily> FontDictionary = new Dictionary<int, FontFamily>();
+        private static readonly Dictionary<int, FontFamily> FontDictionary
+            = new Dictionary<int, FontFamily>();
 
         private static FontFamily GetFontFamily()
         {
             if (!FontAwesome.FontDictionary.ContainsKey(Environment.CurrentManagedThreadId))
-                FontAwesome.FontDictionary.Add(Environment.CurrentManagedThreadId, new FontFamily(FontAwesome.FontUrl));
+                FontAwesome.FontDictionary.Add(
+                    Environment.CurrentManagedThreadId,
+                    new FontFamily(FontAwesome.FontUrl)
+                );
 
             return FontAwesome.FontDictionary[Environment.CurrentManagedThreadId];
         }
@@ -50,12 +54,27 @@ namespace FontAwesome.UWP
             if (dependencyPropertyChangedEventArgs.NewValue != null)
                 fontToSet = (FontAwesomeIcon)dependencyPropertyChangedEventArgs.NewValue;
 
-            //var fontFamily =
-            _ = fontAwesome.SetValueOnUI(FontFamilyProperty, FontAwesome.GetFontFamily());
-            _ = fontAwesome.SetValueOnUI(GlyphProperty, char.ConvertFromUtf32((int)fontToSet));
+            _ = fontAwesome.RunUI(() =>
+            {
+                fontAwesome.SetValue(FontFamilyProperty, FontAwesome.GetFontFamily());
+                fontAwesome.SetValue(GlyphProperty, char.ConvertFromUtf32((int)fontToSet));
+            });
         }
 
         private readonly int _uiThreadId;
+
+        /// <summary>
+        /// Gets or sets the FontAwesome icon
+        /// </summary>
+        public FontAwesomeIcon Icon
+        {
+            get => (FontAwesomeIcon)this.GetValue(FontAwesome.IconProperty);
+            set => _ = this.RunUI(() =>
+            {
+                this.SetValue(FontAwesome.IconProperty, value);
+            });
+        }
+
 
         /// <summary>
         /// Constructor
@@ -67,36 +86,23 @@ namespace FontAwesome.UWP
         }
 
         /// <summary>
-        /// SetValueOnUI
+        /// UIスレッドでActionを実行する。
         /// </summary>
-        /// <param name="dp"></param>
-        /// <param name="value"></param>
+        /// <param name="action"></param>
         /// <returns></returns>
-        public async Task SetValueOnUI(DependencyProperty dp, object value)
+        private async Task RunUI(Action action)
         {
             if (this._uiThreadId == Environment.CurrentManagedThreadId)
             {
-                this.SetValue(dp, value);
+                action();
             }
             else
             {
                 await this.Dispatcher.RunAsync(
                     CoreDispatcherPriority.Normal,
-                    new DispatchedHandler(() =>
-                    {
-                        this.SetValue(dp, value);
-                    })
+                    new DispatchedHandler(action)
                 );
             }
-        }
-
-        /// <summary>
-        /// Gets or sets the FontAwesome icon
-        /// </summary>
-        public FontAwesomeIcon Icon
-        {
-            get => (FontAwesomeIcon)this.GetValue(FontAwesome.IconProperty);
-            set => _ = this.SetValueOnUI(FontAwesome.IconProperty, value);
         }
     }
 }

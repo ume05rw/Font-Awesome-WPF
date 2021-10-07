@@ -16,6 +16,6 @@ using System.Runtime.InteropServices;
 
 //      Version: First three numbers is FontAwesome version, the last number specifies code revision
 //
-[assembly: AssemblyVersion("4.7.0.11")]
-[assembly: AssemblyFileVersion("4.7.0.11")]
+[assembly: AssemblyVersion("4.7.0.12")]
+[assembly: AssemblyFileVersion("4.7.0.12")]
 [assembly: ComVisible(false)]
